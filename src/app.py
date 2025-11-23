@@ -17,9 +17,8 @@ class ShaderRenderApp(App):
     def __init__(
         self,
         *,
-        width: int = 35,
-        height: int = 30,
-        pixel_char: str = "██",
+        width: int = 60,
+        height: int = 50,
         fps: float = 20.0,
     ):
         """Initializes the Shader Render App.
@@ -27,13 +26,11 @@ class ShaderRenderApp(App):
         Args:
             width: The width for both rendering and display (in characters).
             height: The height for both rendering and display (in characters).
-            pixel_char: The character(s) to use for each pixel.
             fps: The target frames per second for rendering.
         """
         super().__init__()
         self.width = width
         self.height = height
-        self.pixel_char = pixel_char
         self.fps = fps
         self.renderer: Optional[OffScreenRenderer] = None
         self.start_time = time.time()
@@ -94,10 +91,18 @@ void main() {
         text_pixels = []
         width, height = img.size
         pixels = img.load()
-        for y in range(height):
+        
+        # We process two rows at a time for each character (upper and lower halves)
+        # So, the effective height for iteration is height // 2
+        for y in range(0, height - 1, 2):  # Iterate with a step of 2
             for x in range(width):
-                r, g, b = pixels[x, y]
-                text_pixels.append(f"[rgb({r},{g},{b})]{self.pixel_char}[/]")
+                # Get color for the upper pixel (background)
+                ra, ga, ba = pixels[x, y]
+                # Get color for the lower pixel (foreground)
+                rb, gb, bb = pixels[x, y+1]
+                
+                # Use the half-block character with two colors using Textual's markup
+                text_pixels.append(f"[rgb({rb},{gb},{bb}) on rgb({ra},{ga},{ba})]\u2584[/]")
             text_pixels.append("\n")
         return "".join(text_pixels)
 

@@ -28,7 +28,7 @@ This script is the user-facing application that displays the output from the ren
 - **The Rendering Pipeline**:
     1. In `update_frame`, it calls `renderer.render_frame()` to get the latest animation frame as a `numpy` array.
     2. The raw pixel data is converted into a `Pillow` (PIL) Image.
-    3. A helper function, `_convert_image_to_text`, iterates through the pixels of the image and builds a string. Each pixel is converted into a colored block character (`██`) using Textual's rich markup, like `[rgb(255,0,0)]██[/]`.
+    3. A helper function, `_convert_image_to_text`, processes the image and builds a string of styled characters. It iterates through the image two rows at a time. For each column, it takes two vertical pixels and uses a half-height block character (`▄`) to represent them. The color of the top pixel is set as the character's background color, and the bottom pixel's color is set as the foreground color. This is done using Textual's rich markup, like `[rgb(0,255,0) on rgb(255,0,0)]▄[/]`. This technique doubles the effective vertical resolution of the display.
     4. The resulting string is used to update a `Static` widget on the screen, effectively drawing the rendered frame in the terminal.
     5. This process repeats, creating a live video effect.
 
@@ -40,7 +40,7 @@ This script is the user-facing application that displays the output from the ren
     - `app.py` asks the renderer for a new frame, passing in the current time (`iTime`).
     - `morderngl_load.py` uses OpenGL to run the fragment shader and renders the output to an off-screen texture.
     - The texture's pixel data is read and returned to `app.py` as a NumPy array.
-    - `app.py` converts this array into a string of colored characters.
+    - `app.py` converts this array into a string of styled half-height block characters, using two pixels of the image for each character in the terminal to double the vertical resolution.
     - The Textual `Static` widget is updated, "drawing" the frame in the terminal.
 
 ## Screenshot
@@ -71,3 +71,4 @@ You need to have the following Python libraries installed:
 - `moderngl`
 - `numpy`
 - `Pillow`
+- `scipy`
